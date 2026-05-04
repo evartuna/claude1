@@ -17,6 +17,8 @@ app.secret_key = os.environ.get("SECRET_KEY", "change-me-in-production")
 
 DATABASE = os.path.join(os.path.dirname(__file__), "attendance.db")
 QR_EXPIRY_MINUTES = int(os.environ.get("QR_EXPIRY_MINUTES", 10))
+# 공인 IP/도메인을 명시할 때 설정. 예) http://203.0.113.5:5000 또는 https://example.com
+BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")
 
 
 # ---------------------------------------------------------------------------
@@ -195,8 +197,9 @@ def view_session(session_id):
         (session_id,),
     ).fetchall()
 
-    # Build QR code pointing to the student attendance URL
-    attend_url = request.host_url.rstrip("/") + url_for("attend", token=sess["token"])
+    # BASE_URL 환경변수가 있으면 우선 사용 (공인 IP/도메인 지원)
+    base = BASE_URL or request.host_url.rstrip("/")
+    attend_url = base + url_for("attend", token=sess["token"])
     qr_img = _make_qr_base64(attend_url)
 
     now = datetime.utcnow().isoformat()
