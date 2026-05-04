@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}로그인 – QR 출석{% endblock %}
+{% block body %}
+<div class="page-center">
+  <div class="card login-card">
+    <div class="logo">
+      <span class="logo-icon">📋</span>
+      <h1>QR 출석 시스템</h1>
+      <p class="subtitle">강의실 출석 확인 플랫폼</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="form">
+      <div class="form-group">
+        <label for="username">아이디</label>
+        <input id="username" name="username" type="text" placeholder="아이디 입력"
+               autocomplete="username" required />
+      </div>
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input id="password" name="password" type="password" placeholder="비밀번호 입력"
+               autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">로그인</button>
+    </form>
+
+    <p class="hint">기본 계정: admin / admin123</p>
+  </div>
+</div>
+{% endblock %}

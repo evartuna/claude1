@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ sess.class_name }} – QR 출석{% endblock %}
+{% block body %}
+<div class="layout">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="{{ url_for('dashboard') }}" class="back-link topbar-back">← 대시보드</a>
+      <span class="topbar-title">{{ sess.class_name }}</span>
+      <div class="topbar-right">
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">로그아웃</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main two-col">
+    <!-- QR Panel -->
+    <section class="panel qr-panel">
+      <div class="panel-header">
+        <h2>QR 코드</h2>
+        {% set expired = now > sess.expires_at %}
+        <span class="badge
+          {% if not sess.active %}badge-off
+          {% elif expired %}badge-expired
+          {% else %}badge-active{% endif %}">
+          {% if not sess.active %}비활성{% elif expired %}만료{% else %}진행중{% endif %}
+        </span>
+      </div>
+
+      {% if sess.active and not expired %}
+      <div class="qr-wrap">
+        <img src="data:image/png;base64,{{ qr_img }}" alt="출석 QR 코드" class="qr-img" />
+      </div>
+      <p class="qr-url">
+        <a href="{{ attend_url }}" target="_blank">{{ attend_url }}</a>
+      </p>
+      <div class="expiry-bar">
+        <span id="expiry-label">만료: {{ sess.expires_at[:16].replace('T', ' ') }} (UTC)</span>
+      </div>
+      {% else %}
+      <div class="qr-disabled">
+        <p>{% if not sess.active %}출석이 마감되었습니다.{% else %}QR 코드가 만료되었습니다.{% endif %}</p>
+      </div>
+      {% endif %}
+
+      <div class="session-actions mt-1">
+        <form method="post" action="{{ url_for('toggle_session', session_id=sess.id) }}" style="display:inline">
+          <button class="btn btn-secondary">
+            {% if sess.active %}출석 마감{% else %}출석 재개{% endif %}
+          </button>
+        </form>
+      </div>
+
+      <div class="session-info mt-1">
+        <table class="info-table">
+          <tr><th>강의명</th><td>{{ sess.class_name }}</td></tr>
+          {% if sess.description %}
+          <tr><th>메모</th><td>{{ sess.description }}</td></tr>
+          {% endif %}
+          <tr><th>생성 시각</th><td>{{ sess.created_at[:16].replace('T', ' ') }}</td></tr>
+          <tr><th>만료 시각</th><td>{{ sess.expires_at[:16].replace('T', ' ') }}</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- Attendance List Panel -->
+    <section class="panel attendance-panel">
+      <div class="panel-header">
+        <h2>출석 현황</h2>
+        <span class="count-badge" id="live-count">{{ attendance|length }}명</span>
+      </div>
+
+      {% if attendance %}
+      <div class="table-wrap">
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>학번</th>
+              <th>이름</th>
+              <th>시각</th>
+            </tr>
+          </thead>
+          <tbody id="attendance-tbody">
+            {% for a in attendance %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ a.student_id }}</td>
+              <td>{{ a.student_name }}</td>
+              <td>{{ a.submitted_at[:16].replace('T', ' ') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state" id="empty-msg">
+        <p>아직 출석한 학생이 없습니다.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/session.js') }}"
+        data-session-id="{{ sess.id }}"></script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}출석 체크 – QR 출석{% endblock %}
+{% block body %}
+<div class="page-center">
+  <div class="card attend-card">
+    <div class="logo">
+      <span class="logo-icon">✅</span>
+      <h1>출석 체크</h1>
+    </div>
+
+    {% if not sess %}
+    <div class="alert alert-error">{{ error }}</div>
+
+    {% elif success %}
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <h2>출석 완료!</h2>
+      <p>출석이 정상적으로 처리되었습니다.</p>
+      <div class="success-detail">
+        <span>강의: <strong>{{ sess.class_name }}</strong></span>
+      </div>
+    </div>
+
+    {% elif error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% if sess %}
+    <p class="class-name-label">{{ sess.class_name }}</p>
+    {% endif %}
+
+    {% elif expired %}
+    <div class="alert alert-warn">
+      <strong>출석 시간이 만료되었습니다.</strong><br />
+      교수님께 문의하세요.
+    </div>
+    <p class="class-name-label">{{ sess.class_name }}</p>
+
+    {% elif inactive %}
+    <div class="alert alert-warn">
+      <strong>출석이 마감되었습니다.</strong><br />
+      교수님께 문의하세요.
+    </div>
+    <p class="class-name-label">{{ sess.class_name }}</p>
+
+    {% else %}
+    <p class="class-name-label">{{ sess.class_name }}</p>
+    {% if sess.description %}
+    <p class="class-desc">{{ sess.description }}</p>
+    {% endif %}
+
+    <form method="post" class="form">
+      <div class="form-group">
+        <label for="student_id">학번 <span class="required">*</span></label>
+        <input id="student_id" name="student_id" type="text"
+               inputmode="numeric" placeholder="학번을 입력하세요"
+               autocomplete="off" required />
+      </div>
+      <div class="form-group">
+        <label for="student_name">이름 <span class="required">*</span></label>
+        <input id="student_name" name="student_name" type="text"
+               placeholder="이름을 입력하세요"
+               autocomplete="name" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-large">출석 완료</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

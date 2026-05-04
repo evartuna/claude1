@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}대시보드 – QR 출석{% endblock %}
+{% block body %}
+<div class="layout">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="topbar-title">📋 QR 출석 시스템</span>
+      <div class="topbar-right">
+        <span class="prof-name">{{ session.professor_name }} 교수님</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">로그아웃</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="section-header">
+      <h2>출석 세션 관리</h2>
+      <a href="{{ url_for('new_session') }}" class="btn btn-primary">+ 새 세션 생성</a>
+    </div>
+
+    {% if sessions %}
+    <div class="session-grid">
+      {% for s in sessions %}
+      {% set expired = now > s.expires_at %}
+      <div class="session-card {% if not s.active %}inactive{% elif expired %}expired{% else %}active{% endif %}">
+        <div class="session-card-header">
+          <div>
+            <h3>{{ s.class_name }}</h3>
+            {% if s.description %}
+            <p class="session-desc">{{ s.description }}</p>
+            {% endif %}
+          </div>
+          <span class="badge
+            {% if not s.active %}badge-off
+            {% elif expired %}badge-expired
+            {% else %}badge-active{% endif %}">
+            {% if not s.active %}비활성{% elif expired %}만료{% else %}진행중{% endif %}
+          </span>
+        </div>
+
+        <div class="session-meta">
+          <span>생성: {{ s.created_at[:16].replace('T', ' ') }}</span>
+          <span>만료: {{ s.expires_at[:16].replace('T', ' ') }}</span>
+        </div>
+
+        <div class="session-count">
+          <span class="count-number">{{ s.attendance_count }}</span>
+          <span class="count-label">명 출석</span>
+        </div>
+
+        <div class="session-actions">
+          <a href="{{ url_for('view_session', session_id=s.id) }}" class="btn btn-secondary btn-sm">상세보기 / QR</a>
+          <form method="post" action="{{ url_for('toggle_session', session_id=s.id) }}" style="display:inline">
+            <button class="btn btn-ghost btn-sm">
+              {% if s.active %}마감{% else %}재개{% endif %}
+            </button>
+          </form>
+          <form method="post" action="{{ url_for('delete_session', session_id=s.id) }}" style="display:inline"
+                onsubmit="return confirm('세션을 삭제하면 출석 기록도 모두 삭제됩니다. 계속하시겠습니까?')">
+            <button class="btn btn-danger btn-sm">삭제</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>아직 출석 세션이 없습니다.</p>
+      <a href="{{ url_for('new_session') }}" class="btn btn-primary">첫 세션 만들기</a>
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
