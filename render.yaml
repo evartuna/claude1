@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: qr-attendance
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: QR_EXPIRY_MINUTES
+        value: 10
